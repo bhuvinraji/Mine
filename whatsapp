@@ -1,0 +1,136 @@
+REF LINK :
+https://slack-redir.net/link?url=https%3A%2F%2Fwww.cloudways.com%2Fblog%2Fimport-export-csv-using-php-and-mysql%2F
+
+
+Implementation :
+
+<?php
+
+   $conn = mysqli_connect("localhost", "root", "", "up_tbl");
+
+ if(isset($_POST["Import"])){
+		
+		$filename=$_FILES["file"]["tmp_name"];		
+
+
+		 if($_FILES["file"]["size"] > 0)
+		 {
+            
+			  $file = fopen($filename, "r");
+			 
+	        while (($getData = fgetcsv($file, 10000, ",")) !== FALSE)
+	         {
+				$query = "select * from `new_tbl` WHERE `email` = '".$getData[3]."' ";
+				$result1 = mysqli_query($conn, $query);
+				$var = mysqli_num_rows($result1);
+				if($var == 0){
+					$sql = "INSERT into new_tbl (id,firstname,lastname,email,reg_date) 
+					values ('".$getData[0]."','".$getData[1]."','".$getData[2]."','".$getData[3]."','".$getData[4]."')";
+					$result = mysqli_query($conn, $sql);
+				 if(!isset($result))
+				 {
+					 echo "<script type=\"text/javascript\">
+							 alert(\"Invalid File:Please Upload CSV File.\");
+							 window.location = \"index.php\"
+						   </script>";		
+				 }
+				 else {
+					   echo "<script type=\"text/javascript\">
+						 alert(\"CSV File has been successfully Imported.\");
+						 window.location = \"index.php\"
+					 </script>";
+				 }
+				} else {
+					echo "<script type=\"text/javascript\">
+					alert(\"Invalid File.\");
+					window.location = \"index.php\"
+				</script>";
+				}
+	          
+	         }
+
+	         fclose($file);	
+		 }
+	}	 
+
+
+ ?>
+ 
+ 
+ 
+ 
+ 
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+    <div id="wrap">
+        <div class="container">
+            <div class="row">
+
+                <form class="form-horizontal" action="functions.php" method="post" name="upload_excel" enctype="multipart/form-data">
+                    <fieldset>
+
+                        <!-- Form Name -->
+                        <legend>Form Name</legend>
+
+                        <!-- File Button -->
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="filebutton">Select File</label>
+                            <div class="col-md-4">
+                                <input type="file" name="file" id="file" class="input-large">
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="singlebutton">Import data</label>
+                            <div class="col-md-4">
+                                <button type="submit" id="submit" name="Import" class="btn btn-primary button-loading" data-loading-text="Loading...">Import</button>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </form>
+
+            </div>
+           
+        </div>
+    </div>
+</body>
+
+</html>
+
+// whatsapp message integration
+
+<?php
+$INSTANCE_ID = 'YOUR_INSTANCE_ID_HERE';  // TODO: Replace it with your gateway instance ID here
+$CLIENT_ID = "YOUR_CLIENT_ID_HERE";  // TODO: Replace it with your Forever Green client ID here
+$CLIENT_SECRET = "53654f8ee3684a37201e3c90a071dbd7";   // TODO: Replace it with your Forever Green client secret here
+$postData = array(
+  'number' => '919578156577',  // TODO: Specify the recipient's number here. NOT the gateway number
+  'message' => 'Howdy! Is this exciting?'
+);
+$headers = array(
+  'Content-Type: application/json',
+  'X-WM-CLIENT-ID: '.$CLIENT_ID,
+  'X-WM-CLIENT-SECRET: '.$CLIENT_SECRET
+);
+$url = 'http://api.whatsmate.net/v3/whatsapp/single/text/message/' . $INSTANCE_ID;
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+$response = curl_exec($ch);
+echo "Response: ".$response;
+curl_close($ch);
+?>
+
